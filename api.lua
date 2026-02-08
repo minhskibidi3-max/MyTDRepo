@@ -1,14 +1,42 @@
 local replicatedstorage = game:GetService("ReplicatedStorage")
-local player = game:GetService("Players").LocalPlayer
-local teamwork = replicatedstorage:WaitForChild("Teawork")
-local bytenet = require(teamwork.Shared.Services.ByteNetworking)
+
+local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/ovoch228/depthsoimgui/refs/heads/main/library'))()
+
+local bytenet = require(replicatedstorage:WaitForChild("Teawork"):WaitForChild("Shared"):WaitForChild("Services"):WaitForChild("ByteNetworking"))
 
 local api = {}
 
--- Original environment variables for state tracking
+function api:Loadout(towers: table)
+	if game.PlaceId ~= 98936097545088 then return end
+
+	for i = 1, #towers do
+		bytenet.Inventory.EquipTower.invoke({["TowerID"] = towers[i], ["Slot"] = i})
+		task.wait(0.5)
+	end
+end
+
+function api:Map(map: string, modifiers: table)
+	if game.PlaceId ~= 98936097545088 then return end
+	
+	bytenet.MatchmakingNew.CreateSingleplayer.invoke({["Gamemode"] = "Standard", ["MapID"] = map, ["Modifiers"] = modifiers})
+end
+
+if game.PlaceId ~= 124069847780670 then return api end
+
+local towers = bytenet.Towers
+local mapinfo = replicatedstorage.RoundInfo
+
+local roundresultui = game:GetService("Players").LocalPlayer.PlayerGui.GameUI.RoundResult
+
+local ostime = os.time
+local taskwait = task.wait
 local env = getgenv()
-env.totalplacedtowers = 0
-env.firsttower = 1
+
+env.StratName = "Strat"
+
+env.timer = 0 -- seconds
+env.lasttime = ostime()
+env.waveinfo = 1
 env.isroundover = false
 
 -- MODIFIED: Removed the loops that check for wave and timer.
